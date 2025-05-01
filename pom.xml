@@ -84,6 +84,11 @@
             <artifactId>hapi-fhir-base</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
         <!-- This dependency includes the EmailSenderImpl we will be using instead of standard javamail.-->
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
