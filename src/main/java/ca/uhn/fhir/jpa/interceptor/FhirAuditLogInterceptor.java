@@ -1,29 +1,33 @@
-package ca.uhn.fhir.rest.server.interceptor;
+package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import ca.uhn.fhir.jpa.starter.repository.FhirAuditLogRepository; // Ensure this is the correct package
+
+import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.repository.FhirAuditLogRepository;
+
 import java.time.Instant;
-import ca.uhn.fhir.entity.*; // Ensure this is the correct package
 
 @Interceptor
 @Component
-public class FhirAuditLogInterceptor {
+public class FhirAuditLogInterceptor extends InterceptorAdapter {
     private static final Logger logger = LoggerFactory.getLogger(FhirAuditLogInterceptor.class);
     private final FhirAuditLogRepository auditLogRepository;
 
-    // Constructor injection
     public FhirAuditLogInterceptor(FhirAuditLogRepository auditLogRepository) {
         this.auditLogRepository = auditLogRepository;
     }
-
     // Log all incoming requests
+    @Async
     @Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
     public void logRequest(RequestDetails theRequestDetails) {
         // Extract request details
@@ -55,6 +59,7 @@ public class FhirAuditLogInterceptor {
         auditLogRepository.save(logEntry);
     }
 
+    @Async
     // Log errors (optional)
     @Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
     public void logError(RequestDetails theRequestDetails, BaseServerResponseException theException) {

@@ -2,7 +2,7 @@
 server:
   #  servlet:
   #    context-path: /example/path
-  port: 8080
+  port: 8082
 #Adds the option to go to eg. http://localhost:8080/actuator/health for seeing the running configuration
 #see https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html#actuator.endpoints
 management:
@@ -32,6 +32,12 @@ management:
     metrics:
       export:
         enabled: true
+
+logging:
+      level:
+        com.example.audit: INFO       # For interceptor logs
+        org.hibernate.SQL: DEBUG      # (Optional) Show SQL queries
+
 spring:
   main:
     allow-circular-references: true
@@ -59,17 +65,37 @@ spring:
       #If using H2, then supply the value of ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect
       #If using postgres, then supply the value of ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect
       hibernate.dialect: ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect
-  #      hibernate.hbm2ddl.auto: update
-  #      hibernate.jdbc.batch_size: 20
+      hibernate.hbm2ddl.auto: update
+      hibernate.jdbc.batch_size: 30
+      hibernate.order_inserts: true
+      hibernate.order_updates: true
   #      hibernate.cache.use_query_cache: false
   #      hibernate.cache.use_second_level_cache: false
   #      hibernate.cache.use_structured_entries: false
   #      hibernate.cache.use_minimal_puts: false
-
+      cache:
+          use_query_cache: false
+          use_second_level_cache: false
+      
+      search:
+        enabled: false
+        backend:
+          type: lucene
+          directory:
+            type: local-filesystem
+            root: target/lucenefiles
+        #    hibernate.search.backend.index_default: fhir_index
+        #    hibernate.search.backend.index_schema_management_strategy: CREATE
+        #    hibernate.search.backend.index_schema_management_strategy: CREATE_OR_APPEND
+        #    hibernate.search.backend.index_schema_management_strategy: NONE
+        #    hibernate.search.backend.index_schema_management_strategy: DROP_AND_CREATE
+        #    hibernate.search.backend.index_schema_management_strategy: DROP_AND_CREATE_OR_APPEND
+        #    hibernate.search.backend.index_schema_management_strategy: DROP_AND_CREATE_OR_APPEND
+        #    hibernate.search.backend.index_schema_management_strategy: CREATE_OR_APPEND
   ###    These settings will enable fulltext search with lucene or elastic
       hibernate.search.enabled: false
   ### lucene parameters
-#      hibernate.search.backend.type: lucene
+      hibernate.search.backend.type: lucene
 #      hibernate.search.backend.analysis.configurer: ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers$HapiLuceneAnalysisConfigurer
 #      hibernate.search.backend.directory.type: local-filesystem
 #      hibernate.search.backend.directory.root: target/lucenefiles
@@ -222,8 +248,8 @@ hapi:
     #	 enable_task_pre_expand_value_sets: true
     #    pre_expand_value_sets_default_count: 1000
     #    pre_expand_value_sets_max_count: 1000
-    #    maximum_expansion_size: 1000
-
+    #    maximum_expansion_size: 1000    
+        
     logical_urls:
       - http://terminology.hl7.org/*
       - https://terminology.hl7.org/*

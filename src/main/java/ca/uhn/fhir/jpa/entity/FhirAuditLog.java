@@ -1,4 +1,4 @@
-package ca.uhn.fhir.entity;
+package ca.uhn.fhir.jpa.entity;
 
 import jakarta.persistence.*;
 

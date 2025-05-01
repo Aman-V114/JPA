@@ -4,16 +4,21 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.DatabaseBinaryContentStorageSvcImpl;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
+import ca.uhn.fhir.jpa.interceptor.FhirAuditLogInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings.CrossPartitionReferenceMode;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.repository.FhirAuditLogRepository;
 import ca.uhn.fhir.jpa.starter.AppProperties;
 import ca.uhn.fhir.jpa.starter.util.JpaHibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.mail.MailConfig;
 import ca.uhn.fhir.rest.server.mail.MailSvc;
+import jakarta.persistence.EntityManager;
+
 import com.google.common.base.Strings;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.springframework.boot.env.YamlPropertySourceLoader;
@@ -21,6 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.jpa.repository.support.JpaRepositoryFactory;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -150,6 +156,17 @@ public class FhirServerConfigCommon {
 	/**
 	 * Configure FHIR properties around the JPA server via this bean
 	 */
+
+	@Bean
+    public FhirAuditLogRepository fhirAuditLogRepository(EntityManager em) {
+        return new JpaRepositoryFactory(em).getRepository(FhirAuditLogRepository.class);
+    }
+
+	@Bean
+    public IServerInterceptor fhirAuditLogInterceptor(FhirAuditLogRepository auditLogRepository) {
+        return new FhirAuditLogInterceptor(auditLogRepository);
+    }
+
 	@Bean
 	public JpaStorageSettings jpaStorageSettings(AppProperties appProperties) {
 		JpaStorageSettings jpaStorageSettings = new JpaStorageSettings();
