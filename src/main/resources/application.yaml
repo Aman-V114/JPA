@@ -35,9 +35,10 @@ management:
 
 logging:
       level:
-        com.example.audit: INFO       # For interceptor logs
-        org.hibernate.SQL: DEBUG      # (Optional) Show SQL queries
-
+        ca.uhn.fhir.jpa.interceptor: INFO       # For interceptor logs
+        # (Optional) Show SQL queries
+      file:
+        name: logs/hapi-fhir.log
 spring:
   main:
     allow-circular-references: true

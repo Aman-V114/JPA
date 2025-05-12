@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.dao.search.IHSearchSortHelper;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
+import ca.uhn.fhir.jpa.interceptor.FhirAuditLogInterceptor;
 import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingInterceptor;
 import ca.uhn.fhir.jpa.ips.provider.IpsOperationProvider;
@@ -40,6 +41,7 @@ import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
+import ca.uhn.fhir.jpa.repository.FhirAuditLogRepository;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
@@ -64,6 +66,7 @@ import ca.uhn.fhir.rest.server.IncomingRequestAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.FhirPathFilterInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
@@ -73,6 +76,8 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import com.google.common.base.Strings;
+
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +93,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.data.jpa.repository.support.JpaRepositoryFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -109,6 +115,26 @@ import static ca.uhn.fhir.jpa.starter.common.validation.IRepositoryValidationInt
 public class StarterJpaConfig {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(StarterJpaConfig.class);
+
+	@Bean
+    public FhirAuditLogRepository fhirAuditLogRepository(EntityManager em) {
+        return new JpaRepositoryFactory(em).getRepository(FhirAuditLogRepository.class);
+    }
+
+	@Bean
+    public IServerInterceptor fhirAuditLogInterceptor(FhirAuditLogRepository auditLogRepository) {
+        ourLog.info("Initializing FhirAuditLogInterceptor");
+		return new FhirAuditLogInterceptor(auditLogRepository);
+    }
+
+	@Bean
+	public IServerInterceptor registerInterceptors(FhirAuditLogInterceptor fhirAuditLogInterceptor, RestfulServer fhirServer) {
+		ourLog.info("Registering FhirAuditLogInterceptor");
+		fhirServer.registerInterceptor(fhirAuditLogInterceptor);
+		return fhirAuditLogInterceptor;
+	}
+
+
 
 	@Bean
 	public IFulltextSearchSvc fullTextSearchSvc() {

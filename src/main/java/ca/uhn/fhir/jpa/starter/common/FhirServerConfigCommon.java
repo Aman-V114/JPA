@@ -157,15 +157,6 @@ public class FhirServerConfigCommon {
 	 * Configure FHIR properties around the JPA server via this bean
 	 */
 
-	@Bean
-    public FhirAuditLogRepository fhirAuditLogRepository(EntityManager em) {
-        return new JpaRepositoryFactory(em).getRepository(FhirAuditLogRepository.class);
-    }
-
-	@Bean
-    public IServerInterceptor fhirAuditLogInterceptor(FhirAuditLogRepository auditLogRepository) {
-        return new FhirAuditLogInterceptor(auditLogRepository);
-    }
 
 	@Bean
 	public JpaStorageSettings jpaStorageSettings(AppProperties appProperties) {

@@ -14,10 +14,10 @@ public class FhirAuditLog {
     private Long id;
 
     private String operation;          // e.g., "CREATE", "READ", "UPDATE"
-    private String resourceType;       // e.g., "Patient", "Observation"
-    private String resourceId;         // e.g., "123"
-    private String userAgent;          // Client (e.g., "Postman/7.28.4")
-    private String clientIp;           // e.g., "192.168.1.1"
+    private String resource_type;       // e.g., "Patient", "Observation"
+    private String resource_id;         // e.g., "123"
+    private String user_agent;          // Client (e.g., "Postman/7.28.4")
+    private String client_ip;           // e.g., "192.168.1.1"
     private Instant timestamp;         // Time of the request
 
     // Getters and setters (generate these in your IDE)
@@ -38,35 +38,35 @@ public class FhirAuditLog {
     }
 
     public String getResourceType() {
-        return resourceType;
+        return resource_type;
     }
 
     public void setResourceType(String resourceType) {
-        this.resourceType = resourceType;
+        this.resource_type = resourceType;
     }
 
     public String getResourceId() {
-        return resourceId;
+        return resource_id;
     }
 
-    public void setResourceId(String resourceId) {
-        this.resourceId = resourceId;
+    public void setResourceId(String resource_id) {
+        this.resource_id = resource_id;
     }
 
     public String getUserAgent() {
-        return userAgent;
+        return user_agent;
     }
 
-    public void setUserAgent(String userAgent) {
-        this.userAgent = userAgent;
+    public void setUserAgent(String user_agent) {
+        this.user_agent = user_agent;
     }
 
-    public String getClientIp() {
-        return clientIp;
+    public String getclient_ip() {
+        return client_ip;
     }
 
-    public void setClientIp(String clientIp) {
-        this.clientIp = clientIp;
+    public void setclient_ip(String client_ip) {
+        this.client_ip = client_ip;
     }
 
     public Instant getTimestamp() {
